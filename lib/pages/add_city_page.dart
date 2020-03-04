@@ -60,6 +60,7 @@ class _AddCityPageState extends State<AddCityPage> with TickerProviderStateMixin
 //          onWillPop: _onWillPop,
           key: _formKey,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),

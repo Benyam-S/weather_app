@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:weather_app/controllers/fade_transition.dart';
 import 'package:weather_app/controllers/forecast_controller.dart';
 import 'package:weather_app/main.dart';
 import 'package:weather_app/models/src/app_settings.dart';
 import 'package:weather_app/models/src/forecast_animation_state.dart';
 import 'package:weather_app/models/src/weather_data.dart';
 import 'package:weather_app/pages/add_city_page.dart';
+import 'package:weather_app/pages/settings_page.dart';
 import 'package:weather_app/styles.dart';
 import 'package:weather_app/utils/forecast_animation_utils.dart';
 import 'package:weather_app/utils/humanize.dart';
@@ -92,9 +94,15 @@ class _ForecastPageState extends State<ForecastPage>
         selectedDay: selectedForecastDay,
         currentlySelectedTimeOfDay:
         _forecastController.selectedHourlyTemperature.dateTime.hour);
-    var starIndex = AnimationUtil.hours
-        .indexOf(_forecastController.selectedHourlyTemperature.dateTime.hour);
-    handleStateChange(starIndex);
+    if (_forecastController.selectedHourlyTemperature.dateTime.hour == 0){
+      var starIndex = AnimationUtil.hours
+          .indexOf(24);
+      handleStateChange(starIndex);
+    }else{
+      var starIndex = AnimationUtil.hours
+          .indexOf(_forecastController.selectedHourlyTemperature.dateTime.hour);
+      handleStateChange(starIndex);
+    }
   }
 
   void initController() {
@@ -209,10 +217,27 @@ class _ForecastPageState extends State<ForecastPage>
             style: Theme.of(context).textTheme.headline,
             animation: _textColorTween.animate(_animationController),
           ),
-          ColorTransitionText(
-            text: _currentTemp,
-            style: Theme.of(context).textTheme.display3,
-            animation: _textColorTween.animate(_animationController),
+          GestureDetector(
+            onTap: (){
+              Future<int> qty = showModalBottomSheet<int>(context: context, builder: (BuildContext context){
+                return Container(
+                  child: Center(
+                    child: RaisedButton(
+                        child: Text("press"),
+                        onPressed: (){
+                          Navigator.pop(context,6);
+                        },
+                      )
+                  ),
+                  height: 200,
+                );
+              });
+            },
+            child: ColorTransitionText(
+              text: _currentTemp,
+              style: Theme.of(context).textTheme.display3,
+              animation: _textColorTween.animate(_animationController),
+            ),
           )
         ],
       ),
@@ -237,15 +262,10 @@ class _ForecastPageState extends State<ForecastPage>
         preferredSize: Size.fromHeight(ui.appBarHeight(context)),
         child: TransitionAppbar(
             animation: _backgroundColorTween.animate(_animationController),
-            leading: GestureDetector(
-              child: ColorTransitionIcon(
+            leading: ColorTransitionIcon(
                 iconData: Icons.location_city,
                 animation: _textColorTween.animate(_animationController),
               ),
-              onTap: (){
-                Navigator.pushNamed(context, WeatherAppRoutes.addCityPage);
-              },
-            ),
             title: ColorTransitionText(
               text: widget.settings.activeCity.name,
               style: Theme.of(context).textTheme.title,
@@ -255,10 +275,27 @@ class _ForecastPageState extends State<ForecastPage>
               Center(
                   child: Container(
                     padding: EdgeInsets.only(right: 10),
-                    child: ColorTransitionText(
-                      text: getTemperatureLabel(),
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                      animation: _textColorTween.animate(_animationController),
+                    child: GestureDetector(
+                      onTap: (){
+                        Future<dynamic> a = Navigator.push(
+                          context,
+                          FadeTransitionRoute(
+                            builder: (BuildContext context){
+                              return SettingsPage(selectedUnit: widget.settings.selectedTemperature,);
+                            }
+                          )
+                        );
+                        a.then((result){
+                          TemperatureUnit d = result;
+                          print("-************************--");
+                          print(d);
+                        });
+                      },
+                      child: ColorTransitionText(
+                        text: getTemperatureLabel(),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        animation: _textColorTween.animate(_animationController),
+                      ),
                     ),
                   ))
             ]),
